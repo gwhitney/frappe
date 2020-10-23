@@ -607,6 +607,26 @@ frappe.ui.Page = Class.extend({
 			df.placeholder = df.label;
 		}
 
+		var key = df.fieldname || df.label;
+		if (df.fieldtype != 'HTML') {
+			if (this.fields_dict[key]) {
+				// already a field with this key. Compare
+				// importance to determine action:
+				const cur_importance = df.importance || 0;
+				const old_importance = this.fields_dict[key].df.importance || 0;
+				if (cur_importance == old_importance) {
+					// Ties are an error
+					frappe.throw(__("Attempt to add duplicate field to page."));
+				}
+				if (cur_importance < old_importance) {
+					// keep the old
+					return this.fields_dict[key];
+				}
+				// New one is more important, so delete the old
+				this.fields_dict[key].wrapper.remove();
+			}
+		}
+
 		var f = frappe.ui.form.make_control({
 			df: df,
 			parent: this.page_form,
@@ -639,11 +659,12 @@ frappe.ui.Page = Class.extend({
 
 		if(df["default"])
 			f.set_input(df["default"])
-		this.fields_dict[df.fieldname || df.label] = f;
+		this.fields_dict[key] = f;
 		return f;
 	},
 	clear_fields: function() {
 		this.page_form.empty();
+		this.fields_dict = {};
 	},
 	show_form: function() {
 		this.page_form.removeClass("hide");
