@@ -652,7 +652,7 @@ export default class Grid {
 	setup_visible_columns() {
 		if (this.visible_columns) return;
 
-		var total_colsize = 1,
+		var total_colsize = 0.0,
 			fields = this.editable_fields || this.docfields;
 
 		this.visible_columns = [];
@@ -661,7 +661,7 @@ export default class Grid {
 			var _df = fields[ci];
 
 			// get docfield if from fieldname
-			df = this.fields_map[_df.fieldname];
+			var df = this.fields_map[_df.fieldname];
 
 			if (!df.hidden
 				&& (this.editable_fields || df.in_list_view)
@@ -688,35 +688,11 @@ export default class Grid {
 					}
 				}
 
-				total_colsize += df.colsize;
-				if (total_colsize > 11)
+				total_colsize += GridRow.xs_cols_of(df.colsize);
+				if (total_colsize > 11.0)
 					return false;
 				this.visible_columns.push([df, df.colsize]);
 			}
-		}
-
-		// redistribute if total-col size is less than 12
-		var passes = 0;
-		while (total_colsize < 11 && passes < 12) {
-			for (var i in this.visible_columns) {
-				var df = this.visible_columns[i][0];
-				var colsize = this.visible_columns[i][1];
-				if (colsize > 1 && colsize < 11
-					&& !in_list(frappe.model.std_fields_list, df.fieldname)) {
-
-					if (passes < 3 && ["Int", "Currency", "Float", "Check", "Percent"].indexOf(df.fieldtype)!==-1) {
-						// don't increase col size of these fields in first 3 passes
-						continue;
-					}
-
-					this.visible_columns[i][1] += 1;
-					total_colsize++;
-				}
-
-				if (total_colsize > 10)
-					break;
-			}
-			passes++;
 		}
 	}
 
