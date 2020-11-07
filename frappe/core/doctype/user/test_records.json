@@ -3,6 +3,7 @@
   "doctype": "User",
   "email": "test@example.com",
   "enabled": 1,
+  "send_welcome_email": 0,
   "first_name": "_Test",
   "new_password": "Eastern_43A1W",
   "roles": [
@@ -21,6 +22,7 @@
  {
   "doctype": "User",
   "email": "test1@example.com",
+  "send_welcome_email": 0,
   "first_name": "_Test1",
   "new_password": "Eastern_43A1W"
  },
@@ -29,6 +31,7 @@
   "email": "test2@example.com",
   "first_name": "_Test2",
   "new_password": "Eastern_43A1W",
+  "send_welcome_email": 0,
   "enabled": 1
  },
  {
@@ -36,6 +39,7 @@
   "email": "test3@example.com",
   "first_name": "_Test3",
   "new_password": "Eastern_43A1W",
+  "send_welcome_email": 0,
   "enabled": 1
  },
  {
@@ -43,12 +47,14 @@
   "email": "testperm@example.com",
   "first_name": "_Test Perm",
   "new_password": "Eastern_43A1W",
+  "send_welcome_email": 0,
   "enabled": 1
  },
  {
   "doctype": "User",
   "email": "testdelete@example.com",
   "enabled": 1,
+  "send_welcome_email": 0,
   "first_name": "_Test",
   "new_password": "Eastern_43A1W",
   "roles": [

@@ -26,7 +26,7 @@ def xmlrunner_wrapper(output):
 		return xmlrunner.XMLTestRunner(*args, **kwargs)
 	return _runner
 
-def main(app=None, module=None, doctype=None, verbose=False, tests=(),
+def main(app=None, module=None, doctype=None, verbose=True, tests=(),
 	force=False, profile=False, junit_xml_output=None, ui_tests=False,
 	doctype_list_path=None, skip_test_records=False, failfast=False):
 	global unittest_runner
@@ -150,7 +150,7 @@ def run_all_tests(app=None, verbose=False, profile=False, ui_tests=False, failfa
 
 	return out
 
-def run_tests_for_doctype(doctypes, verbose=False, tests=(), force=False, profile=False, junit_xml_output=False):
+def run_tests_for_doctype(doctypes, verbose=True, tests=(), force=False, profile=False, junit_xml_output=False):
 	modules = []
 	if not isinstance(doctypes, (list, tuple)):
 		doctypes = [doctypes]
@@ -160,7 +160,7 @@ def run_tests_for_doctype(doctypes, verbose=False, tests=(), force=False, profil
 		if not module:
 			print('Invalid doctype {0}'.format(doctype))
 			sys.exit(1)
-
+		print(f"Hello from {module}")
 		test_module = get_module_name(doctype, module, "test_")
 		if force:
 			for name in frappe.db.sql_list("select name from `tab%s`" % doctype):
@@ -256,7 +256,8 @@ def _add_test(app, path, filename, verbose, test_suite=None, ui_tests=False):
 
 	test_suite.addTest(unittest.TestLoader().loadTestsFromModule(module))
 
-def make_test_records(doctype, verbose=0, force=False):
+def make_test_records(doctype, verbose=True, force=False):
+	print(f"Need to make test records for {doctype} with dependencies {get_dependencies(doctype)}")
 	if not frappe.db:
 		frappe.connect()
 
@@ -269,7 +270,8 @@ def make_test_records(doctype, verbose=0, force=False):
 
 		if not options in frappe.local.test_objects:
 			frappe.local.test_objects[options] = []
-			make_test_records(options, verbose, force)
+			if options != doctype:
+				make_test_records(options, verbose, force)
 			make_test_records_for_doctype(options, verbose, force)
 
 def get_modules(doctype):
@@ -291,7 +293,14 @@ def get_dependencies(doctype):
 	for df in meta.get_table_fields():
 		link_fields.extend(frappe.get_meta(df.options).get_link_fields())
 
-	options_list = [df.options for df in link_fields] + [doctype]
+	options_list = [doctype]
+	for df in link_fields:
+		dep = df.options
+		domain = frappe.db.get_value("DocType", dep, "restrict_to_domain")
+		actived = frappe.get_active_domains()
+		if domain and (domain == 'Hospitality' or domain not in frappe.get_active_domains()):
+			continue
+		options_list.append(dep)
 
 	if hasattr(test_module, "test_dependencies"):
 		options_list += test_module.test_dependencies
@@ -306,11 +315,12 @@ def get_dependencies(doctype):
 	return options_list
 
 def make_test_records_for_doctype(doctype, verbose=0, force=False):
+	print(f"Actually making test records for {doctype}")
 	if not force and doctype in get_test_record_log():
 		return
 
 	module, test_module = get_modules(doctype)
-
+	print(f"... in module {module} with {test_module}")
 	if verbose:
 		print("Making for " + doctype)
 
@@ -332,6 +342,7 @@ def make_test_records_for_doctype(doctype, verbose=0, force=False):
 
 def make_test_objects(doctype, test_records=None, verbose=None, reset=False):
 	'''Make test objects from given list of `test_records` or from `test_records.json`'''
+	print(f"Making |{doctype}|{test_records}|")
 	records = []
 
 	def revert_naming(d):
@@ -369,7 +380,7 @@ def make_test_objects(doctype, test_records=None, verbose=None, reset=False):
 
 		try:
 			d.run_method("before_test_insert")
-			d.insert()
+			d.insert(ignore_mandatory=True)
 
 			if docstatus == 1:
 				d.submit()

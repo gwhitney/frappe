@@ -444,7 +444,7 @@ class Meta(Document):
 		if not hasattr(self, "high_permlevel_fields"):
 			self.high_permlevel_fields = []
 			for df in self.fields:
-				if df.permlevel > 0:
+				if cint(df.permlevel) > 0:
 					self.high_permlevel_fields.append(df)
 
 		return self.high_permlevel_fields
