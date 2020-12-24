@@ -190,7 +190,7 @@ export default class GridRow {
 		if(!this.row_index) {
 			var txt = (this.doc ? this.doc.idx : "&nbsp;");
 			this.row_index = $(
-				`<div class="row-index sortable-handle col col-xs-1">
+				`<div class="row-index sortable-handle col col-row-idx">
 					${this.row_check_html}
 				<span class="hidden-xs">${txt}</span></div>`)
 				.appendTo(this.row)
@@ -222,12 +222,15 @@ export default class GridRow {
 
 	add_open_form_button() {
 		var me = this;
-		if(this.doc && !this.grid.df.in_place_edit) {
+		if(this.grid.df.in_place_edit) {
+			return;
+		}
+		if(this.doc) {
 			// remove row
 			if(!this.open_form_button) {
 				this.open_form_button = $('<a class="close btn-open-row">\
 					<span class="octicon octicon-triangle-down"></span></a>')
-					.appendTo($('<div class="col col-xs-1"></div>').appendTo(this.row))
+					.appendTo($('<div class="col col-open-btn"></div>').appendTo(this.row))
 					.on('click', function() { me.toggle_view(); return false; });
 
 				if(this.is_too_small()) {
@@ -235,6 +238,8 @@ export default class GridRow {
 					this.open_form_button.css({'margin-right': '-2px'});
 				}
 			}
+		} else {
+			$('<div class="col col-open-btn"></div>').appendTo(this.row);
 		}
 	}
 
@@ -274,6 +279,12 @@ export default class GridRow {
 		}
 	}
 
+	static xs_cols_of(norm_cols) {
+		if (norm_cols < 2) return 1.0*norm_cols;
+		if (norm_cols < 3) return 4.0*norm_cols/5.0;
+		return 2.0*norm_cols/3.0;
+	}
+
 	make_column(df, colsize, txt, ci) {
 		let me = this;
 		var add_class = ((["Text", "Small Text"].indexOf(df.fieldtype)!==-1) ?
@@ -283,7 +294,10 @@ export default class GridRow {
 		add_class += (["Check"].indexOf(df.fieldtype)!==-1) ?
 			" text-center": "";
 
-		var $col = $('<div class="col grid-static-col col-xs-'+colsize+' '+add_class+'"></div>')
+		var $col = $('<div class="col grid-static-col col-flex '+add_class
+				+'" style="--grid-n-cols: '+colsize
+				+'; --grid-xs-cols: '+GridRow.xs_cols_of(colsize)
+				+';"></div>')
 			.attr("data-fieldname", df.fieldname)
 			.attr("data-fieldtype", df.fieldtype)
 			.data("df", df)

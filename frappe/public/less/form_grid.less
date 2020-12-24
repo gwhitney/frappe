@@ -21,7 +21,7 @@
 }
 
 .grid-row {
-	padding: 0px 15px;
+	padding: 0px 0px;
 	border-bottom: 1px solid @border-color;
 	.transition(.2s);
 }
@@ -106,16 +106,37 @@ html.chrome .grid-row .grid-row-check {
 	margin-top: 12px;
 }
 
-.grid-row > .row {
-	.col:last-child {
-		margin-right: -10px;
-	}
+.grid-row > .row .col {
+	padding-left: 10px;
+	padding-right: 10px;
+}
 
-	.col {
-		padding-left: 10px;
-		padding-right: 10px;
-		// overflow: hidden;
-	}
+.grid-row > .data-row {
+	display: flex;
+	width: 100%;
+}
+
+.col-row-idx {
+	flex-basis: 5em;
+}
+
+.col-open-btn {
+	flex-basis: calc(1em + 10px);
+}
+
+.grid-row > .row .col.col-open-btn {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.form-grid {
+	--grid-n-cols: 2;
+	--grid-xs-cols: 1.6;
+}
+
+.col-flex {
+	width: calc(var(--grid-xs-cols) * 30px);
+	flex-grow: var(--grid-n-cols);
 }
 
 .grid-body {
@@ -219,6 +240,10 @@ html.chrome .grid-row .grid-row-check {
 		margin-left: -5px !important;
 		margin-right: -5px !important;
 	}
+
+	.col-row-idx {
+		flex-basis: 1em;
+	}
 }
 
 .row-data > .row {
@@ -278,7 +303,7 @@ html.chrome .grid-row .grid-row-check {
 	opacity: 1;
 	height: auto;
 	overflow: visible;
-	margin: 0px -15px;
+	margin: 0px 0px;
 }
 
 .grid-form-heading {
